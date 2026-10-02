@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Калькулятор пиров — тест</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:16px}
+input{font-size:18px;width:80px;padding:6px}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+td{padding:8px 0;border-bottom:1px solid #ddd}
+td:last-child{text-align:right}
+</style>
+</head>
+<body>
+<h1>Калькулятор пиров</h1>
+<p>Тестовое блюдо. Порций: <input id="n" type="number" min="1" value="2"></p>
+<table id="t"></table>
+<p id="sum"></p>
+<script>
+var items=[["Рис",80],["Морковь",50],["Масло",10]];
+function draw(){
+  var n=Math.max(1,Number(document.getElementById("n").value)||1),h="",s=0;
+  items.forEach(function(i){var g=i[1]*n;s+=g;h+="<tr><td>"+i[0]+"</td><td>"+g+" г</td></tr>";});
+  document.getElementById("t").innerHTML=h;
+  document.getElementById("sum").textContent="Общая масса: "+s+" г, на порцию: "+Math.round(s/n)+" г";
+}
+document.getElementById("n").addEventListener("input",draw);
+draw();
+</script>
+</body>
+</html>
