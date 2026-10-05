@@ -2,31 +2,111 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Калькулятор пиров — тест</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Калькулятор пиров</title>
 <style>
-body{font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:16px}
-input{font-size:18px;width:80px;padding:6px}
-table{width:100%;border-collapse:collapse;margin-top:12px}
-td{padding:8px 0;border-bottom:1px solid #ddd}
-td:last-child{text-align:right}
+:root{--bg:#fff8ef;--tx:#2b1d14;--tx2:#6e5a4c;--ac:#b4441e;--soft:#f6e3cf;--ln:#ead6c0;--bar:#fff1e0;--bln:#e5cdb3;--box:#8a7565}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;-webkit-text-size-adjust:100%}
+#app{max-width:480px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+main{flex:1;overflow-y:auto;padding:28px 20px 16px}
+h1{margin:0 0 12px;font-size:32px;font-weight:700}
+.sub{font-size:15px;color:var(--tx2);margin:-6px 0 12px}
+.cap{font-size:14px;color:var(--tx2);margin:12px 0 4px}
+.up{text-transform:uppercase;letter-spacing:.04em}
+.ppl{display:flex;align-items:center;justify-content:space-between;background:var(--soft);border-radius:14px;padding:8px 8px 8px 16px;margin-bottom:12px}
+.ppl b{font-size:17px}
+.step{display:flex;align-items:center;gap:4px}
+.step button{width:44px;height:44px;border:0;border-radius:10px;background:var(--bg);font-size:24px;color:var(--tx)}
+.step span{min-width:48px;text-align:center;font-size:24px;font-weight:700}
+.row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--ln);min-height:44px;width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;font:inherit;color:inherit}
+.row .t{flex:1}
+.row .t div:first-child{font-size:17px}
+.row .t div+div{font-size:14px;color:var(--tx2)}
+.cb{width:24px;height:24px;border-radius:6px;border:2px solid var(--box);flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700}
+.on .cb{background:var(--ac);border-color:var(--ac)}
+.q{text-align:right;font-size:17px;font-weight:600}
+.q small{display:block;font-size:14px;font-weight:400;color:var(--tx2)}
+.done .t div:first-child,.done .q{color:var(--tx2);text-decoration:line-through}
+.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px;margin-bottom:12px}
+.seg button{flex:1;border:0;padding:10px 0;border-radius:8px;background:none;font-size:15px;color:#4a3a2f}
+.seg button.a{background:var(--bg);font-weight:600}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.chips button{border:0;padding:10px 16px;border-radius:20px;background:var(--soft);font-size:15px;color:#4a3a2f}
+.chips button.a{background:var(--ac);color:#fff;font-weight:600}
+.ing{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--ln);min-height:44px;font-size:17px}
+.stp{display:flex;gap:12px;align-items:flex-start;margin:10px 0}
+.stp i{width:28px;height:28px;border-radius:14px;background:var(--soft);display:flex;align-items:center;justify-content:center;flex:none;font-size:15px;font-weight:600;font-style:normal}
+.stp div{font-size:16px;line-height:1.4}
+.empty{color:var(--tx2);font-size:15px;padding:16px 0}
+.sum{font-size:15px;color:#4a3a2f;font-weight:600;margin-top:12px}
+nav{display:flex;border-top:1px solid var(--bln);background:var(--bar);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+nav button{flex:1;min-height:48px;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--tx2);font-size:12px}
+nav button.a{color:var(--ac);font-weight:600}
+.ver{font-size:12px;color:var(--tx2);text-align:center;padding:16px 0 0}
 </style>
 </head>
 <body>
-<h1>Калькулятор пиров</h1>
-<p>Тестовое блюдо. Порций: <input id="n" type="number" min="1" value="2"></p>
-<table id="t"></table>
-<p id="sum"></p>
+<div id="app"><main id="main"></main>
+<nav id="nav"></nav></div>
 <script>
-var items=[["Рис",80],["Морковь",50],["Масло",10]];
-function draw(){
-  var n=Math.max(1,Number(document.getElementById("n").value)||1),h="",s=0;
-  items.forEach(function(i){var g=i[1]*n;s+=g;h+="<tr><td>"+i[0]+"</td><td>"+g+" г</td></tr>";});
-  document.getElementById("t").innerHTML=h;
-  document.getElementById("sum").textContent="Общая масса: "+s+" г, на порцию: "+Math.round(s/n)+" г";
-}
-document.getElementById("n").addEventListener("input",draw);
-draw();
+const VERSION="v0.1";
+const DISHES=[{"name": "Рис", "type": "гарнир", "link": null, "ingredients": [{"name": "Рис", "g": 75.0, "cat": "зерно-бобовые"}, {"name": "вода", "g": 157.5, "cat": "вода"}, {"name": "соль", "g": 1.0, "cat": "специи"}, {"name": "Гхи", "g": 7.0, "cat": "молочные продукты"}]}, {"name": "Пюре Картофельное", "type": "гарнир", "link": null, "ingredients": [{"name": "Картофель", "g": 150.0, "cat": "овощи"}, {"name": "молоко", "g": 50.0, "cat": "молочные продукты"}, {"name": "Гхи", "g": 5.0, "cat": "молочные продукты"}, {"name": "соль", "g": 1.04, "cat": "специи"}, {"name": "Перец черный", "g": 1.04, "cat": "специи"}]}, {"name": "сабджи тыквенный", "type": "основное блюдо", "link": null, "ingredients": [{"name": "тыква", "g": 80.0, "cat": "овощи"}, {"name": "морковь", "g": 80.0, "cat": "овощи"}, {"name": "капуста", "g": 60.0, "cat": "овощи"}, {"name": "Картофель", "g": 60.0, "cat": "овощи"}, {"name": "Сметана", "g": 18.0, "cat": "молочные продукты"}, {"name": "Горчица", "g": 0.5, "cat": "специи"}, {"name": "Карри", "g": 1.5, "cat": "специи"}, {"name": "Имбирь", "g": 3.0, "cat": "прочее"}, {"name": "Гхи", "g": 7.0, "cat": "молочные продукты"}]}, {"name": "Таматар панир малай", "type": "основное блюдо", "link": "http://kurkuma.ru/таматар-панир-малай/", "ingredients": [{"name": "панир", "g": 81.08, "cat": "молочные продукты"}, {"name": "Томат", "g": 108.11, "cat": "овощи"}, {"name": "горох зеленый", "g": 67.57, "cat": "зерно-бобовые"}, {"name": "сметана", "g": 40.54, "cat": "молочные продукты"}, {"name": "Гхи", "g": 2.43, "cat": "молочные продукты"}, {"name": "горчица", "g": 1.08, "cat": "специи"}, {"name": "тмин", "g": 0.81, "cat": "специи"}, {"name": "куркума", "g": 0.81, "cat": "специи"}, {"name": "соль", "g": 2.7, "cat": "специи"}]}, {"name": "Гауранга", "type": "основное блюдо", "link": null, "ingredients": [{"name": "Картофель", "g": 200.0, "cat": "овощи"}, {"name": "Сливки", "g": 100.0, "cat": "молочные продукты"}, {"name": "панир", "g": 50.0, "cat": "молочные продукты"}, {"name": "Сыр твердый", "g": 30.0, "cat": "молочные продукты"}, {"name": "Асафетида", "g": 0.58, "cat": "специи"}, {"name": "Кориандр", "g": 3.0, "cat": "специи"}, {"name": "Перец черный", "g": 0.58, "cat": "специи"}, {"name": "Куркума", "g": 0.6, "cat": "специи"}]}, {"name": "Дал из маша", "type": "суп", "link": "http://kurkuma.ru/дал-из-маша/", "ingredients": [{"name": "маш", "g": 26.67, "cat": "зерно-бобовые"}, {"name": "морковь", "g": 26.67, "cat": "овощи"}, {"name": "Перец болгарский", "g": 16.67, "cat": "овощи"}, {"name": "Томат", "g": 16.67, "cat": "овощи"}, {"name": "Гхи", "g": 10.0, "cat": "молочные продукты"}, {"name": "соль", "g": 2.0, "cat": "специи"}, {"name": "лавровый лист", "g": 0.67, "cat": "специи"}, {"name": "кориандр молотый", "g": 0.83, "cat": "специи"}, {"name": "Перец черный", "g": 0.83, "cat": "специи"}, {"name": "асафетида", "g": 0.83, "cat": "специи"}, {"name": "шамбала", "g": 0.1, "cat": "специи"}, {"name": "вода", "g": 233.33, "cat": "вода"}, {"name": "зелень", "g": 6.67, "cat": "прочее"}]}, {"name": "Тыквенный суп", "type": "суп", "link": null, "ingredients": [{"name": "тыква", "g": 150.0, "cat": "овощи"}, {"name": "морковь", "g": 50.0, "cat": "овощи"}, {"name": "кинза", "g": 5.0, "cat": "овощи"}, {"name": "Перец черный", "g": 0.6, "cat": "специи"}, {"name": "имбирь", "g": 1.0, "cat": "прочее"}, {"name": "Вода", "g": 100.0, "cat": "вода"}]}, {"name": "дал гороховый", "type": "суп", "link": null, "ingredients": [{"name": "горох желтый", "g": 75.0, "cat": "зерно-бобовые"}, {"name": "Имбирь", "g": 1.0, "cat": "специи"}, {"name": "Кумин", "g": 0.6, "cat": "специи"}, {"name": "Перец черный", "g": 0.6, "cat": "специи"}, {"name": "куркума", "g": 1.0, "cat": "специи"}, {"name": "асафетида", "g": 0.3, "cat": "специи"}, {"name": "кокосовая стружка", "g": 2.0, "cat": "прочее"}, {"name": "вода", "g": 220.0, "cat": "вода"}]}, {"name": "Борщ", "type": "суп", "link": null, "ingredients": [{"name": "вода", "g": 238.1, "cat": "прочее"}, {"name": "капуста", "g": 19.05, "cat": "молочные продукты"}, {"name": "Картофель", "g": 38.1, "cat": "молочные продукты"}, {"name": "свекла", "g": 23.81, "cat": "прочее"}, {"name": "морковь", "g": 14.29, "cat": "специи"}, {"name": "Гхи", "g": 1.9, "cat": "специи"}, {"name": "сок лимона", "g": 1.9, "cat": "специи"}, {"name": "сахар", "g": 1.9, "cat": "прочее"}, {"name": "соль", "g": 2.86, "cat": "специи"}, {"name": "Горчица", "g": 0.57, "cat": "специи"}, {"name": "лавровый лист", "g": 0.38, "cat": "специи"}, {"name": "Асафетида", "g": 0.29, "cat": "специи"}, {"name": "карри", "g": 2.86, "cat": "специи"}, {"name": "Прованские травы", "g": 2.86, "cat": "специи"}, {"name": "орегано, базилик, тимьян, розмарин и все остальные сушеные травы", "g": 2.86, "cat": "специи"}]}, {"name": "оливье", "type": "салат", "link": "http://kurkuma.ru/196/", "ingredients": [{"name": "картофель", "g": 40.0, "cat": "овощи"}, {"name": "панир", "g": 40.0, "cat": "молочные продукты"}, {"name": "морковь", "g": 40.0, "cat": "овощи"}, {"name": "листья нори", "g": 1.2, "cat": "овощи"}, {"name": "огурец", "g": 16.67, "cat": "овощи"}, {"name": "майонез", "g": 60.0, "cat": "молочные продукты"}, {"name": "укроп", "g": 5.0, "cat": "прочее"}]}, {"name": "Шубха", "type": "салат", "link": "http://kurkuma.ru/%D1%81%D0%B0%D0%BB%D0%B0%D1%82-%D1%88%D1%83%D0%B1%D1%85%D0%B0-%D0%B8%D0%BB%D0%B8-%D0%BF%D0%BE-%D0%BD%D0%B0%D1%88%D0%B5%D0%BC%D1%83-%D1%88%D1%83%D0%B1%D0%B0/", "ingredients": [{"name": "картофель", "g": 85.71, "cat": "овощи"}, {"name": "морковь", "g": 28.57, "cat": "овощи"}, {"name": "свекла", "g": 28.57, "cat": "овощи"}, {"name": "Листья Нори", "g": 1.2, "cat": "прочее"}, {"name": "Панир", "g": 8.57, "cat": "молочные продукты"}, {"name": "зелень", "g": 7.14, "cat": "прочее"}, {"name": "соль", "g": 0.0, "cat": "специи"}, {"name": "майонез", "g": 37.14, "cat": "молочные продукты"}]}, {"name": "Свекольный салат", "type": "салат", "link": null, "ingredients": [{"name": "свекла", "g": 150.0, "cat": "овощи"}, {"name": "Арахис", "g": 20.0, "cat": "зерно-бобовые"}, {"name": "Сметана", "g": 30.0, "cat": "молочные продукты"}, {"name": "соль черная", "g": 1.0, "cat": "специи"}, {"name": "Перец черный", "g": 1.0, "cat": "специи"}, {"name": "горчица", "g": 1.0, "cat": "специи"}]}, {"name": "халава", "type": "десерт", "link": null, "ingredients": [{"name": "манка", "g": 27.5, "cat": "зерно-бобовые"}, {"name": "сливочное масло", "g": 25.0, "cat": "молочные продукты"}, {"name": "молоко", "g": 87.5, "cat": "молочные продукты"}, {"name": "сахар", "g": 37.5, "cat": "прочее"}, {"name": "кардамон", "g": 0.5, "cat": "специи"}, {"name": "мускатный орех", "g": 1.0, "cat": "специи"}, {"name": "корица", "g": 1.0, "cat": "специи"}, {"name": "изюм", "g": 10.0, "cat": "прочее"}, {"name": "орех", "g": 10.0, "cat": "специи"}]}, {"name": "бурфи", "type": "десерт", "link": null, "ingredients": [{"name": "Сливочное масло", "g": 11.25, "cat": "молочные продукты"}, {"name": "кокосовая стружка", "g": 11.25, "cat": "прочее"}, {"name": "молоко сгущеное", "g": 30.0, "cat": "молочные продукты"}, {"name": "фундук", "g": 5.0, "cat": "прочее"}]}, {"name": "Чатни ябл.", "type": "соус", "link": null, "ingredients": [{"name": "яблоки", "g": 141.67, "cat": "овощи"}]}, {"name": "Напиток имбирный", "type": "напиток", "link": null, "ingredients": [{"name": "корица", "g": 1.0, "cat": "специи"}, {"name": "кардамон", "g": 0.8, "cat": "специи"}, {"name": "гвоздика", "g": 0.8, "cat": "специи"}, {"name": "имбирь", "g": 1.8, "cat": "специи"}, {"name": "вода", "g": 300.0, "cat": "вода"}, {"name": "сахар", "g": 5.0, "cat": "прочее"}]}, {"name": "Сабджи с фасалью", "type": "основное блюдо", "link": "http://kurkuma.ru/%D1%81%D0%B0%D0%B1%D0%B4%D0%B6%D0%B8-%D1%81-%D1%84%D0%B0%D1%81%D0%BE%D0%BB%D1%8C%D1%8E-%D1%80%D0%B5%D1%86%D0%B5%D0%BF%D1%82/", "ingredients": [{"name": "Картофель", "g": 120.0, "cat": "овощи"}, {"name": "капуста", "g": 90.0, "cat": "овощи"}, {"name": "Фасоль красная", "g": 26.67, "cat": "зерно-бобовые"}, {"name": "соль", "g": 3.33, "cat": "прочее"}, {"name": "Кумин", "g": 1.33, "cat": "специи"}, {"name": "куркума", "g": 1.0, "cat": "специи"}, {"name": "Асафетида", "g": 1.0, "cat": "специи"}, {"name": "Кориандр", "g": 1.0, "cat": "специи"}, {"name": "прованские травы", "g": 1.0, "cat": "специи"}, {"name": "Гхи", "g": 8.33, "cat": "молочные продукты"}, {"name": "вода", "g": 50.0, "cat": "вода"}, {"name": "укроп", "g": 5.0, "cat": "специи"}]}, {"name": "Чечевичные котлеты", "type": "основное блюдо", "link": "http://kurkuma.ru/чечевичные-котлеты/", "ingredients": [{"name": "чечевица", "g": 52.08, "cat": "зерно-бобовые"}, {"name": "капуста", "g": 26.04, "cat": "овощи"}, {"name": "морковь", "g": 10.42, "cat": "овощи"}, {"name": "соль", "g": 1.04, "cat": "специи"}, {"name": "Кориандр", "g": 1.04, "cat": "специи"}, {"name": "Перец черный", "g": 0.52, "cat": "специи"}, {"name": "Асафетида", "g": 0.52, "cat": "специи"}, {"name": "мука", "g": 10.42, "cat": "прочее"}, {"name": "Гхи", "g": 5.21, "cat": "молочные продукты"}]}, {"name": "Пицца", "type": "основное блюдо", "link": "http://kurkuma.ru/вегетарианская-пицца/", "ingredients": [{"name": "Мука", "g": 40.0, "cat": "прочее"}, {"name": "соль", "g": 1.0, "cat": "прочее"}, {"name": "сода", "g": 2.4, "cat": "прочее"}, {"name": "кефир", "g": 40.0, "cat": "молочные продукты"}, {"name": "сахар", "g": 3.8, "cat": "прочее"}, {"name": "вода", "g": 6.0, "cat": "вода"}, {"name": "растительно масло", "g": 5.0, "cat": "прочее"}, {"name": "паста томатная", "g": 10.0, "cat": "овощи"}, {"name": "сахар", "g": 12.0, "cat": "прочее"}, {"name": "орегоно", "g": 2.8, "cat": "специи"}, {"name": "вода", "g": 20.0, "cat": "вода"}, {"name": "соль", "g": 0.6, "cat": "прочее"}, {"name": "Перец болгарский", "g": 20.0, "cat": "овощи"}, {"name": "маслины", "g": 2.4, "cat": "овощи"}, {"name": "панир", "g": 20.0, "cat": "молочные продукты"}, {"name": "Томат", "g": 40.0, "cat": "овощи"}, {"name": "Сыр твердый", "g": 50.0, "cat": "молочные продукты"}, {"name": "оливки", "g": 24.0, "cat": "овощи"}, {"name": "кинза", "g": 6.0, "cat": "прочее"}]}, {"name": "Пирог с капустой", "type": "выпечка", "link": "http://kurkuma.ru/пирог-с-щавелем/", "ingredients": [{"name": "мука", "g": 83.33, "cat": "прочее"}, {"name": "сливочное масло", "g": 27.78, "cat": "молочные продукты"}, {"name": "Сметана", "g": 55.56, "cat": "молочные продукты"}, {"name": "сахар", "g": 11.11, "cat": "прочее"}, {"name": "сода", "g": 0.83, "cat": "специи"}, {"name": "капуста", "g": 83.33, "cat": "специи"}, {"name": "Перец черный", "g": 0.56, "cat": "специи"}, {"name": "Асафетида", "g": 0.28, "cat": "прочее"}, {"name": "соль", "g": 2.5, "cat": "специи"}]}];
+const DENS=[{"name": "арахис", "density_g_ml": 0.62, "status": "USDA ≈ (расхождение с FAO >5%)"}, {"name": "асафетида", "density_g_ml": null, "status": "только граммы"}, {"name": "вода", "density_g_ml": 1.0, "status": "по определению"}, {"name": "гвоздика", "density_g_ml": 0.43, "status": "USDA"}, {"name": "горох желтый", "density_g_ml": 0.83, "status": "USDA"}, {"name": "горох зеленый", "density_g_ml": 0.83, "status": "USDA"}, {"name": "горчица", "density_g_ml": 0.42, "status": "USDA"}, {"name": "гхи", "density_g_ml": 0.87, "status": "аналог"}, {"name": "зелень", "density_g_ml": null, "status": "только граммы"}, {"name": "изюм", "density_g_ml": 0.61, "status": "USDA"}, {"name": "имбирь", "density_g_ml": 0.36, "status": "USDA"}, {"name": "капуста", "density_g_ml": null, "status": "только граммы"}, {"name": "кардамон", "density_g_ml": 0.4, "status": "USDA"}, {"name": "карри", "density_g_ml": null, "status": "только граммы"}, {"name": "картофель", "density_g_ml": null, "status": "только граммы"}, {"name": "кефир", "density_g_ml": 1.04, "status": "аналог"}, {"name": "кинза", "density_g_ml": 0.07, "status": "USDA"}, {"name": "кокосовая стружка", "density_g_ml": 0.39, "status": "USDA ≈ (расхождение с FAO >5%)"}, {"name": "кориандр", "density_g_ml": 0.35, "status": "USDA"}, {"name": "кориандр молотый", "density_g_ml": 0.35, "status": "USDA"}, {"name": "корица", "density_g_ml": 0.53, "status": "USDA ≈ (расхождение с FAO >5%)"}, {"name": "кумин", "density_g_ml": 0.42, "status": "USDA"}, {"name": "куркума", "density_g_ml": 0.62, "status": "USDA"}, {"name": "лавровый лист", "density_g_ml": 0.12, "status": "USDA"}, {"name": "листья нори", "density_g_ml": null, "status": "только граммы"}, {"name": "майонез", "density_g_ml": 0.93, "status": "USDA"}, {"name": "манка", "density_g_ml": 0.71, "status": "USDA ≈ (расхождение с FAO >5%)"}, {"name": "маслины", "density_g_ml": 0.57, "status": "USDA"}, {"name": "маш", "density_g_ml": 0.88, "status": "USDA"}, {"name": "молоко", "density_g_ml": 1.02, "status": "USDA"}, {"name": "молоко сгущеное", "density_g_ml": 1.29, "status": "USDA"}, {"name": "морковь", "density_g_ml": null, "status": "только граммы"}, {"name": "мука", "density_g_ml": 0.53, "status": "USDA"}, {"name": "мускатный орех", "density_g_ml": 0.46, "status": "USDA"}, {"name": "огурец", "density_g_ml": null, "status": "только граммы"}, {"name": "оливки", "density_g_ml": 0.57, "status": "USDA"}, {"name": "орегано, базилик, тимьян, розмарин и все остальные сушеные травы", "density_g_ml": null, "status": "замена на свежие ×3"}, {"name": "орегоно", "density_g_ml": 0.2, "status": "USDA"}, {"name": "орех", "density_g_ml": 0.49, "status": "USDA ≈ (форма не указана)"}, {"name": "панир", "density_g_ml": null, "status": "только граммы"}, {"name": "паста томатная", "density_g_ml": 1.1, "status": "USDA"}, {"name": "перец болгарский", "density_g_ml": null, "status": "только граммы"}, {"name": "перец черный", "density_g_ml": 0.47, "status": "USDA"}, {"name": "прованские травы", "density_g_ml": null, "status": "только граммы"}, {"name": "растительно масло", "density_g_ml": 0.92, "status": "USDA"}, {"name": "рис", "density_g_ml": 0.78, "status": "USDA"}, {"name": "сахар", "density_g_ml": 0.85, "status": "USDA ≈ (расхождение с FAO >5%)"}, {"name": "свекла", "density_g_ml": null, "status": "только граммы"}, {"name": "сливки", "density_g_ml": 1.01, "status": "USDA"}, {"name": "сливочное масло", "density_g_ml": 0.96, "status": "USDA"}, {"name": "сметана", "density_g_ml": 0.89, "status": "USDA"}, {"name": "сода", "density_g_ml": 0.93, "status": "USDA"}, {"name": "сок лимона", "density_g_ml": 1.03, "status": "USDA"}, {"name": "соль", "density_g_ml": 1.22, "status": "USDA"}, {"name": "соль черная", "density_g_ml": null, "status": "только граммы"}, {"name": "сыр твердый", "density_g_ml": 0.45, "status": "USDA ≈ (принят как тёртый)"}, {"name": "тмин", "density_g_ml": 0.44, "status": "USDA"}, {"name": "томат", "density_g_ml": null, "status": "только граммы"}, {"name": "тыква", "density_g_ml": null, "status": "только граммы"}, {"name": "укроп", "density_g_ml": 0.04, "status": "USDA ≈ (свежий)"}, {"name": "фасоль красная", "density_g_ml": 0.78, "status": "USDA"}, {"name": "фундук", "density_g_ml": 0.57, "status": "USDA"}, {"name": "чечевица", "density_g_ml": 0.81, "status": "USDA ≈ (расхождение с FAO >5%)"}, {"name": "шамбала", "density_g_ml": 0.75, "status": "USDA"}, {"name": "яблоки", "density_g_ml": null, "status": "только граммы"}];
+const dens={};DENS.forEach(x=>dens[x.name.toLowerCase()]=x);
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const num=n=>{let v=n>=10?Math.round(n):Math.round(n*10)/10;return v.toLocaleString('ru-RU',{maximumFractionDigits:1})};
+const state={tab:'dishes',persons:8,sel:new Set(),stock:new Set(),shop:'all',cook:null};
+const ICON={dishes:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',shop:'<path d="M5 7h14M5 12h14M5 17h9"/>',cook:'<path d="M4 10h16v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3zM8 6v1M12 5v2M16 6v1"/>'};
+const TABS=[['dishes','Блюда'],['shop','Покупки'],['cook','Готовка']];
+// количество: граммы из рецепта на порцию × персоны; мл — если плотность известна; ≈ — если статус не «USDA»/«по определению»
+function qty(name,gPer){const g=gPer*state.persons;const d=dens[name.toLowerCase()];let ml=null,approx=false;
+ if(d&&d.density_g_ml){ml=g/d.density_g_ml;approx=!(d.status==='USDA'||d.status==='по определению')}
+ return{g,ml,approx}}
+function qHtml(q,onlyMl){ if(onlyMl) return `<div class="q">${num(q.ml)} мл</div>`;
+ return `<div class="q">${num(q.g)} г${q.ml!=null?`<small>${q.approx?'≈ ':''}${num(q.ml)} мл</small>`:''}</div>`}
+function shopList(){const m=new Map();
+ [...state.sel].sort((a,b)=>a-b).forEach(i=>DISHES[i].ingredients.forEach(ing=>{const k=ing.name.toLowerCase();if(k==='вода')return;m.set(k,(m.get(k)||0)+ing.g)}));
+ return[...m].map(([k,g])=>({key:k,name:cap(k),gPer:g}))}
+function render(){
+ const m=document.getElementById('main');let h='';
+ if(state.tab==='dishes'){
+  h+=`<h1>Блюда</h1><div class="ppl"><b>Персон</b><div class="step"><button aria-label="Меньше" data-a="m">−</button><span>${state.persons}</span><button aria-label="Больше" data-a="p">+</button></div></div><div class="cap">Выбрано: ${state.sel.size} из ${DISHES.length}</div>`;
+  DISHES.forEach((d,i)=>{const n=d.ingredients.length;h+=`<button class="row ${state.sel.has(i)?'on':''}" data-a="d" data-i="${i}"><span class="cb">${state.sel.has(i)?'✓':''}</span><span class="t"><div>${cap(d.name)}</div><div>${cap(d.type)} · ${n} ингр.</div></span></button>`})}
+ else if(state.tab==='shop'){
+  const L=shopList();const need=L.filter(x=>!state.stock.has(x.key));
+  h+=`<h1>Покупки</h1><div class="sub">${state.persons} персон · ${state.sel.size} блюд</div>`;
+  if(!L.length)h+=`<div class="empty">Сначала выберите блюда на вкладке «Блюда».</div>`;
+  else{h+=`<div class="seg"><button data-a="s" data-v="all" class="${state.shop==='all'?'a':''}">Продукты</button><button data-a="s" data-v="buy" class="${state.shop==='buy'?'a':''}">Купить</button></div>`;
+   if(state.shop==='all')h+=`<div class="cap">Отметьте, что уже есть дома. Остальное попадёт в «Купить».</div>`;
+   (state.shop==='all'?L:need).forEach(x=>{const q=qty(x.name,x.gPer);const has=state.stock.has(x.key);
+    h+=`<button class="row ${state.shop==='all'&&has?'on done':''}" ${state.shop==='all'?`data-a="h" data-k="${x.key}"`:''}>${state.shop==='all'?`<span class="cb">${has?'✓':''}</span>`:''}<span class="t"><div>${x.name}</div></span><div class="q">${num(q.g)} г</div></button>`});
+   h+=`<div class="sum">К покупке: ${need.length} из ${L.length} позиций</div>`}}
+ else{
+  h+=`<h1>Готовка</h1>`;const ids=[...state.sel].sort((a,b)=>a-b);
+  if(!ids.length)h+=`<div class="empty">Сначала выберите блюда на вкладке «Блюда».</div>`;
+  else{if(!ids.includes(state.cook))state.cook=ids[0];
+   h+=`<div class="chips">${ids.map(i=>`<button data-a="c" data-i="${i}" class="${i===state.cook?'a':''}">${cap(DISHES[i].name)}</button>`).join('')}</div>`;
+   const d=DISHES[state.cook];
+   h+=`<div class="cap up">Ингредиенты · ${state.persons} персон</div>`;
+   d.ingredients.forEach(ing=>{const q=qty(ing.name,ing.g);const w=ing.name.toLowerCase()==='вода';
+    h+=`<div class="ing"><span>${cap(ing.name)}</span>${w&&q.ml!=null?qHtml(q,true):qHtml(q)}</div>`});
+   h+=`<div class="cap up">Этапы${d.link?' · источник: '+new URL(d.link).hostname:''}</div>`;
+   h+=`<div class="stp"><i>1</i><div>[Этапы готовки ещё не написаны.]</div></div>`}}
+ h+=`<div class="ver">${VERSION}</div>`;
+ m.innerHTML=h;
+ document.getElementById('nav').innerHTML=TABS.map(([k,t])=>`<button data-a="t" data-v="${k}" class="${state.tab===k?'a':''}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${ICON[k]}</svg>${t}</button>`).join('')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
+ if(a==='t')state.tab=b.dataset.v;
+ else if(a==='m')state.persons=Math.max(1,state.persons-1);
+ else if(a==='p')state.persons=Math.min(99,state.persons+1);
+ else if(a==='d'){const i=+b.dataset.i;state.sel.has(i)?state.sel.delete(i):state.sel.add(i)}
+ else if(a==='h'){const k=b.dataset.k;state.stock.has(k)?state.stock.delete(k):state.stock.add(k)}
+ else if(a==='s')state.shop=b.dataset.v;
+ else if(a==='c')state.cook=+b.dataset.i;
+ const sc=document.getElementById('main').scrollTop;render();document.getElementById('main').scrollTop=sc});
+render();
 </script>
 </body>
 </html>
